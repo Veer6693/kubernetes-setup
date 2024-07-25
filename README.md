@@ -259,8 +259,8 @@ kubectl apply -f metallb.yaml
 ## 5.	Now, setting up dynamic NFS provisioning in k8’s
 
 ```bash
-Sudo apt install nfs-common
-Sudo apt install nfs-kernel-server
+sudo apt install nfs-common
+sudo apt install nfs-kernel-server
 ```
 ```bash
 sudo mkdir /srv/nfs/kubedata -p
@@ -271,5 +271,121 @@ sudo nano /etc/exports
 ```
 - changes are done in this file so that we can expose the location to everybody.
 
+![image](https://github.com/user-attachments/assets/c48e94d5-1900-419b-9834-bf54a3e5cb58)
+
+```bash
+sudo exportfs -rav
+```
+![image](https://github.com/user-attachments/assets/369573cf-2b0a-45b7-bdc5-6b4b5bf51c1c)
+- output should be displayed like this.
+
+Nfs provisioner Link From Github:[Link](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/tree/v4.0.2/deploy)
+- All the required  yaml files are present in the above repository.
+```bash
+nano rbac.yaml
+```
+```bash
+kubectl apply -f rbac.yaml
+```
+![image](https://github.com/user-attachments/assets/dfc65ca6-05e5-4def-a0fe-159362f5bd0a)
+```bash
+nano deployment.yaml
+```
+```bash
+kubectl apply -f deployment.yaml
+```
+![image](https://github.com/user-attachments/assets/db516853-96d2-4640-860d-1b87a9591867)
+
+```bash
+nano 4-pvc-nfs.yaml 
+```
+```bash
+kubectl apply -f 4-pvc-nfs.yaml
+```
+![image](https://github.com/user-attachments/assets/7ea78926-3534-467e-95bd-f6e1465e81d6)
+
+## Jupyterhub Deployments :
+
+### Check all the nodes are running fine, 
+```bash
+kubectl cluster info
+kubectl get nodes
+```
+
+### Check all the pods(system) that are running or not, 
+```bash
+kubectl get pods -A
+```
+
+### Check metalllb is running fine  and also check dynamic NFS provisioning is running properly, which we did earlier
+```bash
+kubectl get all
+```
+ ### Also check storage class ,
+```bash
+kubectl get storageclass
+```
+
+### Now check helm is installed or not 
+```bash
+which helm
+```
+
+- if helm is not not present install using command below
+```bash
+curl https://raw.githubusercontent.com/helm/helm/HEAD/scripts/get-helm-3 | bash
+helm version
+```
+
+### Now we have to install jupyterhub , but we use older version which is 0.11.x 
+
+[https://z2jh.jupyter.org/en/0.11.x/jupyterhub/installation.html](https://z2jh.jupyter.org/en/0.11.x/jupyterhub/installation.html)
+
+- Make Helm aware of the JupyterHub Helm chart repository so you can install the JupyterHub chart from it without having to use a long URL name.
+```bash
+helm repo add jupyterhub https://jupyterhub.github.io/helm-chart/
+```
+```bash
+helm repo update
+```
+
+- Check heml reposetory list :
+```bash
+helm repo list
+helm search repo jupyterhub
+```
+- Now pull the values file which is jupyterhub.yaml file : 
+```bash
+helm show values jupyterhub/jupyterhub > /tmp/jupyterhub.yaml
+```
+- Now before edit that yaml file generate secret token using following command and copy that token
+```bash
+openssl rand -hex 32
+```
+- Now open the yaml file and find proxy -> secret token then in this paste that token you copied
+```bash
+nano /tmp/jupyterhub.yaml
+```
+**`Note:search for storageClassName and StorageClass and change it to your desired storage class. If default storage class no need to mention if not please specify your storage class name.`**
 
 
+### Now we use helm to deploy jupyterhub 
+```bash
+helm installl jupyterhub jupyterhub/jupyterhub –values /tmp/jupyterhub.yaml
+```
+- It will take some time to install..
+
+### Now check helm list to ensure that jupyterhub is installed successfully 
+```bash
+helm list
+helm status jupyterhub
+```
+
+### Now run and check all the pods are running fine: 
+```bash
+kubectl get all 
+kubectl get pods 
+kubectl get deployments
+```
+
+### Now, check the service/proxy-public that we set up with MetalLB. Find the IP it's using, and open that  to access JupyterHub from outside.
