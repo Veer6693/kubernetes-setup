@@ -2,7 +2,7 @@
 
 This document provides a step-by-step guide for setting up a Kubernetes cluster on a virtual machine and deploying JupyterHub on it. It is intended for system administrators and DevOps engineers.
 
-## Prerequisites
+## 1. Prerequisites
 
 ### Hardware Requirements
 
@@ -37,7 +37,7 @@ This document provides a step-by-step guide for setting up a Kubernetes cluster 
 | Master | 10.10.20.36 | k8s-master   |
 | Worker | 10.10.20.32 | k8s-worker1  |
 
-## Cluster Setup
+## 2. Cluster Setup
 
 ### Set Hostname and Update Hosts File
 
@@ -202,7 +202,7 @@ https://github.com/projectcalico/calico/blob/master/manifests/calico.yaml
 kubectl apply -f calico.yaml
 ```
 
-## For load balancing Deploy metalllb in k8’s : 
+## 3. For load balancing Deploy metalllb in k8’s : 
 
 ```bash
 sudo apt install sipcalc
@@ -256,7 +256,7 @@ spec:
 kubectl apply -f metallb.yaml
 ```
 
-## 5.	Now, setting up dynamic NFS provisioning in k8’s
+## 4.	Now, setting up dynamic NFS provisioning in k8’s
 
 ```bash
 sudo apt install nfs-common
@@ -304,7 +304,7 @@ kubectl apply -f 4-pvc-nfs.yaml
 ```
 ![image](https://github.com/user-attachments/assets/7ea78926-3534-467e-95bd-f6e1465e81d6)
 
-## Jupyterhub Deployments :
+## 5. Jupyterhub Deployments :
 
 ### Check all the nodes are running fine, 
 ```bash
